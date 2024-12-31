@@ -15,34 +15,42 @@ const loadVideos = () => {
         .catch((error) => console.log(error))
 }
 
+const removeActiveClass = () =>{
+    const buttons = document.getElementsByClassName('category-btn');
+    for(let btn of buttons){
+        btn.classList.remove('active');
+    }
+}
 
+const loadCategoryVideos = (id) =>{
+    fetch(`https://openapi.programming-hero.com/api/phero-tube/category/${id}`)
+    .then(res => res.json())
+    .then(data => {
+        removeActiveClass();
+        const activeBtn = document.getElementById(`btn-${id}`);
+        // console.log(activeBtn)
+        activeBtn.classList.add('active');
+        displayVideos(data.category);
+    })
+    .catch((error) => console.log(error))
 
-
-/* 
- {
-      "category_id": "1001",
-      "video_id": "aaaa",
-      "thumbnail": "https://i.ibb.co/L1b6xSq/shape.jpg",
-      "title": "Shape of You",
-      "authors": [
-        {
-          "profile_picture": "https://i.ibb.co/D9wWRM6/olivia.jpg",
-          "profile_name": "Olivia Mitchell",
-          "verified": ""
-        }
-      ],
-      "others": {
-        "views": "100K",
-        "posted_date": "16278"
-      },
-      "description": "Dive into the rhythm of 'Shape of You,' a captivating track that blends pop sensibilities with vibrant beats. Created by Olivia Mitchell, this song has already gained 100K views since its release. With its infectious melody and heartfelt lyrics, 'Shape of You' is perfect for fans looking for an uplifting musical experience. Let the music take over as Olivia's vocal prowess and unique style create a memorable listening journey."
-    },
-*/
-
-
+}
 
 const displayVideos = (videos) => {
     const videosContainer = document.getElementById('videos-container');
+    videosContainer.innerHTML = '';
+    if(videos.length == 0){
+        videosContainer.classList.remove('grid');
+        videosContainer.innerHTML = `
+            <div class="flex flex-col items-center justify-center">   
+                <img src="./assets/icon.png"/>
+                <h1 class="text-2xl lg:text-5xl text-gray-500"> No Content here in this category</h1>
+            </div>
+        `;
+    }
+    else{
+        videosContainer.classList.add('grid');
+    }
 
     videos.forEach(video => {
         const card = document.createElement('div');
@@ -85,12 +93,15 @@ const displayCategories = (categories) => {
 
     categories.forEach(item => {
         // create a button
-        const button = document.createElement('button');
-        button.classList = 'btn', 'btn-primary';
-        button.innerText = item.category;
-
-        // add button on category container
-        categoryContainer.append(button);
+        const buttonContainer = document.createElement('div');
+        buttonContainer.classList = ""
+        buttonContainer.innerHTML = `
+            <button id="btn-${item.category_id}" onclick="loadCategoryVideos(${item.category_id})" class="btn category-btn">
+            ${item.category}
+            </button>
+        `
+        
+        categoryContainer.append(buttonContainer);
     });
 }
 
